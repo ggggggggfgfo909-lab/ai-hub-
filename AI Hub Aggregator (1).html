@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Universe Hub - Всі штучні інтелекти в одному місці</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f6ff',
+                            100: '#e0edff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        },
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-4 z-20 shrink-0">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+            <button id="toggle-sidebar-btn" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-700 md:hidden">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-brain text-xl"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">AI Hub</span>
+            </div>
+        </div>
+
+        <!-- Mode Switches & Quick Actions -->
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <!-- Layout Selector -->
+            <div class="bg-slate-900 p-1 rounded-xl flex items-center border border-slate-700">
+                <button id="single-view-btn" onclick="setViewMode('single')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow transition-all flex items-center space-x-1.5">
+                    <i class="fa-regular fa-window-maximize"></i>
+                    <span class="hidden sm:inline">Одне вікно</span>
+                </button>
+                <button id="split-view-btn" onclick="setViewMode('split')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center space-x-1.5">
+                    <i class="fa-solid fa-columns"></i>
+                    <span class="hidden sm:inline">Порівняння (Split)</span>
+                </button>
+            </div>
+
+            <!-- Custom Gemini Generator Modal Trigger -->
+            <button onclick="openGeminiModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium text-xs sm:text-sm shadow-lg shadow-purple-500/20 hover:opacity-90 transition flex items-center space-x-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span class="hidden md:inline">Gemini AI Studio</span>
+            </button>
+
+            <!-- External Link -->
+            <a href="https://chat.openai.com" target="_blank" title="Відкрити в новій вкладці" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-700 transition">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left Sidebar (AI List & Catalog) -->
+        <aside id="sidebar" class="w-72 bg-slate-800/95 backdrop-blur border-r border-slate-700 flex flex-col transition-all duration-300 z-10 absolute md:relative h-full transform -translate-x-full md:translate-x-0">
+            
+            <!-- Search & Filter Bar -->
+            <div class="p-3 border-b border-slate-700 space-y-2">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-ai" placeholder="Пошук штучного інтелекту..." 
+                           class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <!-- Category Tags -->
+                <div class="flex space-x-1 overflow-x-auto pb-1 text-xs" id="category-filters">
+                    <button onclick="filterCategory('all')" class="cat-btn active px-2.5 py-1 rounded-lg bg-blue-600 text-white font-medium whitespace-nowrap">Усі</button>
+                    <button onclick="filterCategory('chat')" class="cat-btn px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 whitespace-nowrap">Чат</button>
+                    <button onclick="filterCategory('search')" class="cat-btn px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 whitespace-nowrap">Пошук</button>
+                    <button onclick="filterCategory('image')" class="cat-btn px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 whitespace-nowrap">Арт</button>
+                    <button onclick="filterCategory('code')" class="cat-btn px-2.5 py-1 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 whitespace-nowrap">Код</button>
+                </div>
+            </div>
+
+            <!-- List of AI Services -->
+            <div class="flex-1 overflow-y-auto p-2 space-y-1" id="ai-list">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Sidebar Footer / User Notes -->
+            <div class="p-3 border-t border-slate-700 bg-slate-800">
+                <button onclick="toggleQuickNotes()" class="w-full py-2 px-3 bg-slate-900 hover:bg-slate-700 rounded-xl text-xs font-medium text-slate-300 flex items-center justify-between transition border border-slate-700">
+                    <span class="flex items-center space-x-2">
+                        <i class="fa-regular fa-note-sticky text-amber-400"></i>
+                        <span>Швидкий промпт / Нотатки</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-up text-xs text-slate-500" id="notes-chevron"></i>
+                </button>
+                <div id="notes-panel" class="hidden mt-2">
+                    <textarea id="quick-prompt-input" rows="3" placeholder="Введіть свій промпт тут для швидкого копіювання..." 
+                              class="w-full bg-slate-900 text-xs border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                    <button onclick="copyQuickPrompt()" class="w-full mt-1 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs transition flex items-center justify-center space-x-1">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Скопіювати промпт</span>
+                    </button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Workspace (Frames Area) -->
+        <main class="flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+            
+            <!-- Secondary Bar (Split Controls - Hidden by default) -->
+            <div id="split-controls" class="hidden bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2 w-1/2 pr-2">
+                    <span class="font-semibold text-blue-400">Лівий AI:</span>
+                    <select id="left-ai-select" onchange="switchSplitAI('left', this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-slate-200">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2 w-1/2 pl-2 border-l border-slate-700">
+                    <span class="font-semibold text-purple-400">Правий AI:</span>
+                    <select id="right-ai-select" onchange="switchSplitAI('right', this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-slate-200">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Main View Container -->
+            <div id="view-container" class="flex-1 flex w-full h-full relative">
+                <!-- Single View Iframe -->
+                <div id="single-frame-wrapper" class="w-full h-full relative">
+                    
+                    <!-- Fallback Notice for strict iframes -->
+                    <div id="iframe-fallback" class="hidden absolute inset-0 bg-slate-900 flex flex-col items-center justify-center p-6 text-center z-20">
+                        <div class="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 text-2xl mb-4">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-100 mb-2" id="fallback-title">Сайт блокує вбудовування</h3>
+                        <p class="text-sm text-slate-400 max-w-md mb-6" id="fallback-desc">
+                            Цей сервіс забороняє відображення всередині сторонніх сайтів (X-Frame-Options / CSP). Ви можете відкрити його у новій вкладці браузера.
+                        </p>
+                        <a id="fallback-link" href="#" target="_blank" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium text-sm transition shadow-lg shadow-blue-500/20 flex items-center space-x-2">
+                            <span>Відкрити у новій вкладці</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                    </div>
+
+                    <iframe id="main-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+                </div>
+
+                <!-- Split View (Hidden initially) -->
+                <div id="split-frame-wrapper" class="w-full h-full flex hidden">
+                    <div class="w-1/2 h-full border-r border-slate-700 relative">
+                        <iframe id="left-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+                    </div>
+                    <div class="w-1/2 h-full relative">
+                        <iframe id="right-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Gemini AI Studio Modal (Direct API Interaction) -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                    <h3 class="font-bold text-slate-100">Gemini AI Studio (Прямий Генератор)</h3>
+                </div>
+                <button onclick="closeGeminiModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4 overflow-y-auto space-y-4 flex-1">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Ваш Промпт / Запитання</label>
+                    <textarea id="gemini-prompt" rows="3" placeholder="Опишіть що потрібно згенерувати або запитайте щось..." 
+                              class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="generateGeminiText()" id="gen-text-btn" class="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl text-sm transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <span>Згенерувати Текст</span>
+                    </button>
+                    <button onclick="generateGeminiImage()" id="gen-img-btn" class="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium rounded-xl text-sm transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Згенерувати Картинку</span>
+                    </button>
+                </div>
+
+                <!-- Result Area -->
+                <div class="mt-4 pt-4 border-t border-slate-700">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Результат</label>
+                    
+                    <div id="gemini-loading" class="hidden py-8 text-center">
+                        <div class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <span class="text-xs text-slate-400">Нейромережа створює відповідь...</span>
+                    </div>
+
+                    <div id="gemini-result-text" class="hidden bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-slate-300 max-h-60 overflow-y-auto whitespace-pre-wrap"></div>
+                    
+                    <div id="gemini-result-img" class="hidden text-center">
+                        <img id="generated-image" class="max-h-72 mx-auto rounded-xl border border-slate-700 shadow-lg" src="" alt="AI Output">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 border border-slate-700 text-slate-200 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400" id="toast-icon"></i>
+        <span id="toast-message" class="text-xs font-medium">Сповіщення</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Catalog of AI Tools
+        const aiDatabase = [
+            {
+                id: 'gemini',
+                name: 'Google Gemini',
+                category: 'chat',
+                desc: 'Швидка потужна нейромережа від Google',
+                icon: 'fa-sparkles',
+                color: 'from-blue-500 to-cyan-400',
+                url: 'https://gemini.google.com',
+                embeddable: false
+            },
+            {
+                id: 'chatgpt',
+                name: 'ChatGPT',
+                category: 'chat',
+                desc: 'Найпопулярніший чат-бот від OpenAI',
+                icon: 'fa-robot',
+                color: 'from-emerald-500 to-teal-400',
+                url: 'https://chat.openai.com',
+                embeddable: false
+            },
+            {
+                id: 'perplexity',
+                name: 'Perplexity AI',
+                category: 'search',
+                desc: 'Розумний пошуковик з джерелами',
+                icon: 'fa-magnifying-glass',
+                color: 'from-teal-400 to-emerald-600',
+                url: 'https://www.perplexity.ai',
+                embeddable: false
+            },
+            {
+                id: 'claude',
+                name: 'Claude Anthropic',
+                category: 'chat',
+                desc: 'Чудово працює з текстами та аналізом',
+                icon: 'fa-brain',
+                color: 'from-amber-600 to-orange-500',
+                url: 'https://claude.ai',
+                embeddable: false
+            },
+            {
+                id: 'deepseek',
+                name: 'DeepSeek',
+                category: 'code',
+                desc: 'Потужна відкрита модель для коду та аналітики',
+                icon: 'fa-code',
+                color: 'from-blue-600 to-indigo-700',
+                url: 'https://chat.deepseek.com',
+                embeddable: false
+            },
+            {
+                id: 'poe',
+                name: 'Poe by Quora',
+                category: 'chat',
+                desc: 'Доступ до сотень різних ботів в одному місці',
+                icon: 'fa-layer-group',
+                color: 'from-purple-500 to-indigo-500',
+                url: 'https://poe.com',
+                embeddable: false
+            },
+            {
+                id: 'huggingface',
+                name: 'HuggingChat',
+                category: 'chat',
+                desc: 'Open-source альтернатива ChatGPT',
+                icon: 'fa-face-smile',
+                color: 'from-yellow-400 to-amber-500',
+                url: 'https://huggingface.co/chat',
+                embeddable: true
+            },
+            {
+                id: 'copilot',
+                name: 'Microsoft Copilot',
+                category: 'search',
+                desc: 'AI від Microsoft на базі GPT-4',
+                icon: 'fa-compass',
+                color: 'from-blue-500 to-blue-700',
+                url: 'https://copilot.microsoft.com',
+                embeddable: false
+            },
+            {
+                id: 'midjourney',
+                name: 'Midjourney',
+                category: 'image',
+                desc: 'Генерація високоякісних зображень',
+                icon: 'fa-palette',
+                color: 'from-pink-500 to-rose-500',
+                url: 'https://www.midjourney.com',
+                embeddable: false
+            },
+            {
+                id: 'v0',
+                name: 'v0.dev by Vercel',
+                category: 'code',
+                desc: 'Генерація веб-інтерфейсів та React коду',
+                icon: 'fa-laptop-code',
+                color: 'from-slate-100 to-slate-400',
+                url: 'https://v0.dev',
+                embeddable: false
+            }
+        ];
+
+        // State Management
+        let activeAI = aiDatabase[0];
+        let activeLeftAI = aiDatabase[0];
+        let activeRightAI = aiDatabase[1];
+        let viewMode = 'single'; // 'single' or 'split'
+        let currentCategory = 'all';
+
+        // DOM elements
+        const aiListContainer = document.getElementById('ai-list');
+        const mainIframe = document.getElementById('main-iframe');
+        const leftIframe = document.getElementById('left-iframe');
+        const rightIframe = document.getElementById('right-iframe');
+        const iframeFallback = document.getElementById('iframe-fallback');
+        const fallbackTitle = document.getElementById('fallback-title');
+        const fallbackDesc = document.getElementById('fallback-desc');
+        const fallbackLink = document.getElementById('fallback-link');
+        const searchInput = document.getElementById('search-ai');
+        const sidebar = document.getElementById('sidebar');
+
+        // Initialize App
+        window.onload = () => {
+            renderAIList();
+            populateSplitSelectors();
+            loadAI(activeAI);
+            
+            // Sidebar toggle for mobile
+            document.getElementById('toggle-sidebar-btn').addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            // Search filter event
+            searchInput.addEventListener('input', (e) => {
+                renderAIList(e.target.value.toLowerCase());
+            });
+        };
+
+        // Render Sidebar List
+        function renderAIList(filterText = '') {
+            aiListContainer.innerHTML = '';
+
+            const filtered = aiDatabase.filter(ai => {
+                const matchesSearch = ai.name.toLowerCase().includes(filterText) || ai.desc.toLowerCase().includes(filterText);
+                const matchesCat = currentCategory === 'all' || ai.category === currentCategory;
+                return matchesSearch && matchesCat;
+            });
+
+            if(filtered.length === 0) {
+                aiListContainer.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">Нічого не знайдено</div>`;
+                return;
+            }
+
+            filtered.forEach(ai => {
+                const isActive = activeAI.id === ai.id;
+                const item = document.createElement('div');
+                item.className = `p-2.5 rounded-xl cursor-pointer transition flex items-center justify-between group ${
+                    isActive ? 'bg-blue-600/20 border border-blue-500/40 text-white' : 'hover:bg-slate-700/50 text-slate-300'
+                }`;
+                
+                item.onclick = () => {
+                    activeAI = ai;
+                    renderAIList(searchInput.value.toLowerCase());
+                    loadAI(ai);
+                    // Hide mobile sidebar on selection
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                };
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${ai.color} flex items-center justify-center text-white shrink-0 text-xs shadow-md">
+                            <i class="fa-solid ${ai.icon}"></i>
+                        </div>
+                        <div class="truncate">
+                            <h4 class="text-xs font-semibold truncate ${isActive ? 'text-blue-400' : 'text-slate-200'}">${ai.name}</h4>
+                            <p class="text-[10px] text-slate-400 truncate">${ai.desc}</p>
+                        </div>
+                    </div>
+                    <span class="text-slate-500 group-hover:text-slate-300 text-xs">
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </span>
+                `;
+                aiListContainer.appendChild(item);
+            });
+        }
+
+        // Filter Categories
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-slate-700', 'text-slate-300');
+            });
+            event.target.classList.remove('bg-slate-700', 'text-slate-300');
+            event.target.classList.add('bg-blue-600', 'text-white');
+            renderAIList(searchInput.value.toLowerCase());
+        }
+
+        // Load AI into Iframe / Show Fallback
+        function loadAI(ai) {
+            iframeFallback.classList.add('hidden');
+
+            if (ai.embeddable) {
+                mainIframe.src = ai.url;
+            } else {
+                // Show smart fallback for sites with strict X-Frame-Options
+                fallbackTitle.innerText = `${ai.name} захищено від прямого вбудовування`;
+                fallbackDesc.innerText = `Більшість великих AI-платформ (як ${ai.name}) забороняють показувати свої інтерфейси у чужих iframe з міркувань безпеки.`;
+                fallbackLink.href = ai.url;
+                mainIframe.src = "about:blank";
+                iframeFallback.classList.remove('hidden');
+            }
+        }
+
+        // Switch View Modes
+        function setViewMode(mode) {
+            viewMode = mode;
+            const singleBtn = document.getElementById('single-view-btn');
+            const splitBtn = document.getElementById('split-view-btn');
+            const singleWrapper = document.getElementById('single-frame-wrapper');
+            const splitWrapper = document.getElementById('split-frame-wrapper');
+            const splitControls = document.getElementById('split-controls');
+
+            if (mode === 'single') {
+                singleBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow transition-all flex items-center space-x-1.5";
+                splitBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center space-x-1.5";
+                
+                singleWrapper.classList.remove('hidden');
+                splitWrapper.classList.add('hidden');
+                splitControls.classList.add('hidden');
+            } else {
+                splitBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow transition-all flex items-center space-x-1.5";
+                singleBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-all flex items-center space-x-1.5";
+                
+                singleWrapper.classList.add('hidden');
+                splitWrapper.classList.remove('hidden');
+                splitControls.classList.remove('hidden');
+
+                switchSplitAI('left', activeLeftAI.id);
+                switchSplitAI('right', activeRightAI.id);
+            }
+        }
+
+        // Populate Split Selectors
+        function populateSplitSelectors() {
+            const leftSelect = document.getElementById('left-ai-select');
+            const rightSelect = document.getElementById('right-ai-select');
+            
+            leftSelect.innerHTML = '';
+            rightSelect.innerHTML = '';
+
+            aiDatabase.forEach(ai => {
+                leftSelect.innerHTML += `<option value="${ai.id}">${ai.name}</option>`;
+                rightSelect.innerHTML += `<option value="${ai.id}">${ai.name}</option>`;
+            });
+
+            leftSelect.value = activeLeftAI.id;
+            rightSelect.value = activeRightAI.id;
+        }
+
+        function switchSplitAI(side, aiId) {
+            const ai = aiDatabase.find(a => a.id === aiId);
+            if (side === 'left') {
+                activeLeftAI = ai;
+                leftIframe.src = ai.embeddable ? ai.url : 'about:blank';
+            } else {
+                activeRightAI = ai;
+                rightIframe.src = ai.embeddable ? ai.url : 'about:blank';
+            }
+        }
+
+        // Quick Notes Toggle
+        function toggleQuickNotes() {
+            const panel = document.getElementById('notes-panel');
+            const chevron = document.getElementById('notes-chevron');
+            panel.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        function copyQuickPrompt() {
+            const text = document.getElementById('quick-prompt-input').value;
+            if(!text) {
+                showToast("Промпт порожній!", true);
+                return;
+            }
+            
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            showToast("Промпт скопійовано в буфер!");
+        }
+
+        // Toast Notification Function
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMessage.innerText = message;
+            toastIcon.className = isError 
+                ? "fa-solid fa-triangle-exclamation text-amber-400" 
+                : "fa-solid fa-circle-check text-emerald-400";
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Modal Gemini Handler
+        function openGeminiModal() {
+            document.getElementById('gemini-modal').classList.remove('hidden');
+        }
+        function closeGeminiModal() {
+            document.getElementById('gemini-modal').classList.add('hidden');
+        }
+
+        // Direct Gemini API Request (Text)
+        async function generateGeminiText() {
+            const prompt = document.getElementById('gemini-prompt').value;
+            if(!prompt) return showToast('Введіть текст промпту!', true);
+
+            const loader = document.getElementById('gemini-loading');
+            const textResult = document.getElementById('gemini-result-text');
+            const imgResult = document.getElementById('gemini-result-img');
+
+            loader.classList.remove('hidden');
+            textResult.classList.add('hidden');
+            imgResult.classList.add('hidden');
+
+            try {
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const outputText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Не вдалося отримати відповідь від Gemini.";
+
+                textResult.innerText = outputText;
+                textResult.classList.remove('hidden');
+            } catch (err) {
+                textResult.innerText = "Помилка виклику API: " + err.message;
+                textResult.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Direct Gemini API Request (Image)
+        async function generateGeminiImage() {
+            const prompt = document.getElementById('gemini-prompt').value;
+            if(!prompt) return showToast('Введіть описовий промпт для арт-моделі!', true);
+
+            const loader = document.getElementById('gemini-loading');
+            const textResult = document.getElementById('gemini-result-text');
+            const imgResult = document.getElementById('gemini-result-img');
+            const imgEl = document.getElementById('generated-image');
+
+            loader.classList.remove('hidden');
+            textResult.classList.add('hidden');
+            imgResult.classList.add('hidden');
+
+            try {
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            responseModalities: ['TEXT', 'IMAGE']
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const base64Data = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                if (base64Data) {
+                    imgEl.src = `data:image/png;base64,${base64Data}`;
+                    imgResult.classList.remove('hidden');
+                } else {
+                    textResult.innerText = "Не вдалося згенерувати зображення. Спробуйте змінити промпт.";
+                    textResult.classList.remove('hidden');
+                }
+            } catch (err) {
+                textResult.innerText = "Помилка виклику API генерації зображень: " + err.message;
+                textResult.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
