@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Universe Hub - Всі штучні інтелекти в одному місці</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#131b2e',
+                        cardHover: '#1e293b',
+                        accent: '#6366f1',
+                        accentHover: '#4f46e5'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    </style>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-darkBg/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-brain text-white text-xl"></i>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">AI Universe Hub</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button onclick="openNotesModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-xl transition border border-slate-700 flex items-center space-x-2">
+                    <i class="fa-solid fa-note-sticky text-indigo-400"></i>
+                    <span class="hidden sm:inline">Мої нотатки та промпти</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Hero Section & Search -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4">
+                Усі нейромережі — <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">в один клік</span>
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base mb-8">
+                Миттєвий перехід до найкращих штучних інтелектів світу без зайвих вікон та обмежень безпеки.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="max-w-xl mx-auto relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="filterAI()" placeholder="Шукати нейромережу (наприклад, ChatGPT, Claude, Midjourney)..." 
+                    class="w-full pl-12 pr-4 py-3.5 bg-cardBg border border-slate-800 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition shadow-inner">
+            </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8" id="categoryFilters">
+            <button onclick="filterCategory('all')" class="cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-indigo-600 text-white shadow-md shadow-indigo-600/20" data-cat="all">Всі</button>
+            <button onclick="filterCategory('text')" class="cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-cardBg hover:bg-cardHover text-slate-300 border border-slate-800" data-cat="text">Текст & Чат</button>
+            <button onclick="filterCategory('image')" class="cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-cardBg hover:bg-cardHover text-slate-300 border border-slate-800" data-cat="image">Зображення</button>
+            <button onclick="filterCategory('code')" class="cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-cardBg hover:bg-cardHover text-slate-300 border border-slate-800" data-cat="code">Код</button>
+            <button onclick="filterCategory('audio')" class="cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-cardBg hover:bg-cardHover text-slate-300 border border-slate-800" data-cat="audio">Аудіо & Відео</button>
+        </div>
+
+        <!-- AI Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="aiGrid">
+            <!-- Cards will be injected by JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-cardBg border border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-note-sticky text-indigo-400"></i>
+                    <h2 class="text-lg font-bold">Мої нотатки та корисні промпти</h2>
+                </div>
+                <button onclick="closeNotesModal()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 flex-grow overflow-y-auto space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Додати новий запис / промпт</label>
+                    <textarea id="newNoteInput" rows="3" placeholder="Введіть текст промпту чи ідею тут..." class="w-full p-3 bg-darkBg border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500"></textarea>
+                    <button onclick="saveNote()" class="mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition shadow-lg shadow-indigo-600/20">Зберегти нотатку</button>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase mb-3">Збережені записи</h3>
+                    <div id="notesList" class="space-y-3">
+                        <!-- Notes populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+        <p>AI Universe Hub &copy; 2026. Усі посилання відкриваються напряму на офіційних сайтах сервісів.</p>
+    </footer>
+
+    <!-- JavaScript Data & Logic -->
+    <script>
+        const aiList = [
+            {
+                name: "ChatGPT",
+                category: "text",
+                desc: "Найпопулярніший чат-бот від OpenAI для генерації тексту, аналізу та креативу.",
+                url: "https://chatgpt.com",
+                icon: "fa-robot",
+                color: "from-emerald-500 to-teal-600",
+                badge: "Топ"
+            },
+            {
+                name: "Google Gemini",
+                category: "text",
+                desc: "Штучний інтелект від Google з величезним контекстним вікном та швидкою пошуковою базою.",
+                url: "https://gemini.google.com",
+                icon: "fa-sparkles",
+                color: "from-blue-500 to-indigo-600",
+                badge: "Google"
+            },
+            {
+                name: "Claude",
+                category: "text",
+                desc: "Передова мовна модель від Anthropic, ідеальна для написання текстів та програмування.",
+                url: "https://claude.ai",
+                icon: "fa-feather",
+                color: "from-amber-600 to-orange-600",
+                badge: "Популярне"
+            },
+            {
+                name: "Perplexity AI",
+                category: "text",
+                desc: "Розумний пошуковик на базі AI, який знаходить інформацію з посиланнями на джерела.",
+                url: "https://www.perplexity.ai",
+                icon: "fa-magnifying-glass-chart",
+                color: "from-cyan-500 to-blue-600",
+                badge: "Пошук"
+            },
+            {
+                name: "DeepSeek",
+                category: "code",
+                desc: "Потужна та швидка модель для логічних задач, аналізу даних та написання коду.",
+                url: "https://chat.deepseek.com",
+                icon: "fa-code",
+                color: "from-blue-600 to-cyan-500",
+                badge: "Тренди"
+            },
+            {
+                name: "Midjourney",
+                category: "image",
+                desc: "Найкращий генератор неймовірних художніх зображень за текстовим описом.",
+                url: "https://www.midjourney.com",
+                icon: "fa-image",
+                color: "from-purple-600 to-pink-600",
+                badge: "Зображення"
+            },
+            {
+                name: "Leonardo AI",
+                category: "image",
+                desc: "Професійна платформа для генерації графіки та ігрових асетів за допомогою AI.",
+                url: "https://leonardo.ai",
+                icon: "fa-wand-magic-sparkles",
+                color: "from-indigo-600 to-violet-600",
+                badge: "Генератор"
+            },
+            {
+                name: "ElevenLabs",
+                category: "audio",
+                desc: "Найреалістичніший сервіс клонування голосу та озвучування текстів різними мовами.",
+                url: "https://elevenlabs.io",
+                icon: "fa-volume-high",
+                color: "from-rose-500 to-red-600",
+                badge: "Аудіо"
+            },
+            {
+                name: "Hugging Face",
+                category: "code",
+                desc: "Головна світова спільнота розробників, відкриті моделі, датасети та бібліотеки AI.",
+                url: "https://huggingface.co",
+                icon: "fa-face-smile",
+                color: "from-yellow-500 to-amber-600",
+                badge: "Open Source"
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        function renderAI(items) {
+            const grid = document.getElementById('aiGrid');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-face-grimace text-4xl mb-3"></i>
+                        <p class="text-base">Нічого не знайдено за вашим запитом.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(ai => {
+                const card = document.createElement('a');
+                card.href = ai.url;
+                card.target = "_blank";
+                card.rel = "noopener noreferrer";
+                card.className = "group bg-cardBg hover:bg-cardHover border border-slate-800 hover:border-slate-700 rounded-3xl p-6 transition duration-300 flex flex-col justify-between shadow-lg relative overflow-hidden";
+                
+                card.innerHTML = `
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br ${ai.color} opacity-10 rounded-full blur-xl group-hover:opacity-20 transition"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${ai.color} flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fa-solid ${ai.icon}"></i>
+                            </div>
+                            <span class="px-3 py-1 bg-slate-800/80 text-slate-300 text-xs font-semibold rounded-full border border-slate-700/50">${ai.badge}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition mb-2 flex items-center justify-between">
+                            ${ai.name}
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-0 group-hover:opacity-100 transition transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">${ai.desc}</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-800/60 flex items-center justify-between text-xs font-medium text-indigo-400">
+                        <span>Відкрити сервіс</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] transform group-hover:translate-x-1 transition"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterAI() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = aiList.filter(ai => {
+                const matchesCat = currentCategory === 'all' || ai.category === currentCategory;
+                const matchesSearch = ai.name.toLowerCase().includes(query) || ai.desc.toLowerCase().includes(query);
+                return matchesCat && matchesSearch;
+            });
+            renderAI(filtered);
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = "cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-indigo-600 text-white shadow-md shadow-indigo-600/20";
+                } else {
+                    btn.className = "cat-btn px-4 py-2 rounded-xl text-sm font-medium transition bg-cardBg hover:bg-cardHover text-slate-300 border border-slate-800";
+                }
+            });
+            filterAI();
+        }
+
+        // Notes functionality
+        function openNotesModal() {
+            document.getElementById('notesModal').classList.remove('hidden');
+            document.getElementById('notesModal').classList.add('flex');
+            loadNotes();
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').classList.remove('flex');
+            document.getElementById('notesModal').classList.add('hidden');
+        }
+
+        function saveNote() {
+            const text = document.getElementById('newNoteInput').value.trim();
+            if (!text) return;
+            let notes = JSON.parse(localStorage.getItem('ai_hub_notes') || '[]');
+            notes.unshift({ text, date: new Date().toLocaleDateString() });
+            localStorage.setItem('ai_hub_notes', JSON.stringify(notes));
+            document.getElementById('newNoteInput').value = '';
+            loadNotes();
+        }
+
+        function deleteNote(index) {
+            let notes = JSON.parse(localStorage.getItem('ai_hub_notes') || '[]');
+            notes.splice(index, 1);
+            localStorage.setItem('ai_hub_notes', JSON.stringify(notes));
+            loadNotes();
+        }
+
+        function loadNotes() {
+            const list = document.getElementById('notesList');
+            let notes = JSON.parse(localStorage.getItem('ai_hub_notes') || '[]');
+            if (notes.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-sm">У вас поки немає збережених нотаток.</p>`;
+                return;
+            }
+            list.innerHTML = '';
+            notes.forEach((note, idx) => {
+                const div = document.createElement('div');
+                div.className = "bg-darkBg border border-slate-800 p-4 rounded-xl flex justify-between items-start space-x-3";
+                div.innerHTML = `
+                    <div>
+                        <p class="text-sm text-slate-200 whitespace-pre-wrap mb-2">${escapeHtml(note.text)}</p>
+                        <span class="text-[10px] text-slate-500">${note.date}</span>
+                    </div>
+                    <button onclick="deleteNote(${idx})" class="text-slate-500 hover:text-red-400 p-1">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Initial render
+        renderAI(aiList);
+    </script>
+</body>
+</html>
